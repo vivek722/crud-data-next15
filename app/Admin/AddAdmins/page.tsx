@@ -6,14 +6,14 @@ import  {Roles} from '@/Constants/Role'
 export default function LoginPage() {
     const router = useRouter();
     const [userName, setUserName] = useState('');
-    const [email, setUserEmail] = useState('');
+    const [userEmail, setUserEmail] = useState('');
     const [Phone, setUserPhone] = useState('');
-    const [password, setUserPassword] = useState('');
+    const [userPassword, setUserPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false)
 
  
-     const Role = Roles.customer;
+     const Role =Roles.admin;
      const isActive = true;
      const Emailverified = true;
 
@@ -22,19 +22,19 @@ export default function LoginPage() {
             setError('userName is required');
             return false;
         }
-        if(!email){
+        if(!userEmail){
             setError('Email is required');
             return false;
         }
-        else if(email.indexOf('@')===-1){
+        else if(userEmail.indexOf('@')===-1){
             setError('Please enter valid email address');
             return false;
         }
-        if(!password){
+        if(!userPassword){
             setError('Password is required');
             return false;
         }
-        else if(password.length <6){
+        else if(userPassword.length <6){
             setError('Password must be at least 6 characters long');
             return false;
         }
@@ -42,7 +42,7 @@ export default function LoginPage() {
             setError('Phone is required');
             return false;
         }
-        else if(Phone.length  ==10){
+        else if(userPassword.length  ==10){
             setError('phone  No must be at have 10 digit');
             return false;
         }
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userName,email,Phone,password,Role,isActive,Emailverified}),
+                body: JSON.stringify({ userName,  userEmail, Phone, userPassword,Role,isActive,Emailverified}),
             });
 
              const data = await response.json();
@@ -110,7 +110,7 @@ export default function LoginPage() {
                             type="email"
                             id="email"      
                             className="w-full px-3 py-2 border rounded"
-                            value={email}
+                            value={userEmail}
                             onChange={(e) => setUserEmail(e.target.value)}
                             required
                         />
@@ -132,7 +132,7 @@ export default function LoginPage() {
                             type="password"
                             id="password"
                             className="w-full px-3 py-2 border rounded"
-                            value={password}
+                            value={userPassword}
                             onChange={(e) => setUserPassword(e.target.value)}
                             required
                         />

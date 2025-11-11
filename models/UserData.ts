@@ -3,17 +3,27 @@ import Counter from './Counter';
 export interface user{
     // _id: number;
     userName:string,
-    userEmail:string,
-    userPassword:string
+    email:string,
+    phone:string,
+    password: string,
+    role:string
+    isActive:boolean
+    emailVerified :boolean
+    createdAt:Date,
+    updatedAt:Date
 }
 
 const userSchema = new Schema({
   _id: { type: Number }, // ← Explicitly define as Number
   userName: { type: String, required: true },
-  userEmail: { type: String, required: true, unique: true },
-  userPassword: { type: String, required: true }
-}, {
-  timestamps: true
+  email: { type: String, required: true, unique: true },
+  phone: String,
+  password: { type: String, required: true },
+  role: { type: String, enum: ['customer', 'admin', 'vendor'], default: 'customer' },
+  isActive: { type: Boolean, default: true },
+  emailVerified: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 // 🔑 Auto-increment middleware

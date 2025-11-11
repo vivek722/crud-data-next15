@@ -1,6 +1,7 @@
 import { NextRequest,NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import User from "@/models/UserData";
+import logger from "@/lib/logger";
 
 
 export async function GET(request: NextRequest) {
@@ -24,6 +25,16 @@ export async function GETById(id: NextRequest) {
     }
 }
 
+export async function serachUser(userName: NextRequest) {
+    try {
+        await dbConnect();
+        const users = await User.find(userName  );
+        return NextResponse.json({ status: true, users }, { status: 200 });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        return NextResponse.json({ status: false, message: 'Internal Server Error' }, { status: 500 });
+    }
+}
 export async function PUT(request: NextRequest) {
     try{
         await dbConnect();

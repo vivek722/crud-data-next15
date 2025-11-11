@@ -1,0 +1,6 @@
+{"level":"info","message":" Database connection occur ","timestamp":"2025-11-11T11:01:09.446Z"}
+{"level":"error","message":"Error insert user ValidationError: password: Path `password` is required., email: Path `email` is required.","timestamp":"2025-11-11T11:01:09.620Z"}
+{"level":"info","message":" Database connection occur ","timestamp":"2025-11-11T11:02:05.273Z"}
+{"level":"error","message":"Error insert user ValidationError: password: Path `password` is required., email: Path `email` is required.","timestamp":"2025-11-11T11:02:05.377Z"}
+{"level":"info","message":" Database connection occur ","timestamp":"2025-11-11T11:06:12.636Z"}
+{"level":"info","message":" save data inside database  ","timestamp":"2025-11-11T11:06:12.781Z"}

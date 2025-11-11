@@ -32,17 +32,6 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
-        
-        // const token = await generateJWT({ userId: user._id.toString() });
-        //  await cookies().set({
-        //     name: 'auth_token',
-        //     value: token,
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production',
-        //     maxAge: 60 * 60 * 24 * 7,
-        //     path: '/',
-        //     sameSite: 'lax',
-        //     });
         return NextResponse.json(
             {
                 message: 'Login successful',
