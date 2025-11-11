@@ -9,13 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3",
     "next": "16.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

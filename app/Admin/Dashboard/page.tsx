@@ -1,26 +1,29 @@
 'use client';
 import { set } from 'mongoose';
 import { useRouter } from 'next/navigation'
-import  React from 'react'              
-import {useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
+import { useState } from 'react'
 import { rootCertificates } from 'tls';
 import toast from 'react-hot-toast'
 
-export interface userResponse{
+export interface userResponse {
     _id: number;
-    userName:string,
-    userEmail:string,
-    userPassword:string
+    userName: string,
+    userEmail: string,
+    userPassword: string
 }
 export default function DesktopPage() {
     const router = useRouter();
-    const [count,setCount] = useState(0);
-    const [users,setUsers] = useState<userResponse[]>([]);
-    const [error,setError] = useState('');
-    const [loading,setLoading] = useState(false);
+    const [count, setCount] = useState(0);
+    const [users, setUsers] = useState<userResponse[]>([]);
+    const [error, setError] = useState('');
+    const [searchText, setSearchText] = useState('');
+    const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        handleFetchData();
+    }, []);
 
-    
     const handleFetchData = async () => {
         setLoading(true);
         setError('');
@@ -33,7 +36,7 @@ export default function DesktopPage() {
             });
             const data = await response.json();
             if (response.ok) {
-                if(data.users.length === 0){
+                if (data.users.length === 0) {
                     toast.error('No data   found');
                     setError('No data   found');
                 }
@@ -42,7 +45,7 @@ export default function DesktopPage() {
                 setUsers(data.users);
             }
             else {
-                  toast.error(data.message || 'An error occurred while fetching data');
+                toast.error(data.message || 'An error occurred while fetching data');
                 setError(data.message || 'An error occurred while fetching data');
             }
         } catch (error) {
@@ -52,54 +55,62 @@ export default function DesktopPage() {
             setLoading(false);
         }
     }
-    async function  handleDeleteUser(id:number){
+    async function handleDeleteUser(id: number) {
         setLoading(true);
         setError('');
-        try{
+        try {
             const response = await fetch('/api/user/Desktop', {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: id }),
             });
             const data = await response.json();
-            if(response.ok){
+            if (response.ok) {
                 toast.success('User deleted successfully');
                 handleFetchData();
             }
-            else{
+            else {
                 toast.error(data.message || 'An error occurred while deleting user');
                 setError(data.message || 'An error occurred while deleting user');
             }
-        }catch(error){
+        } catch (error) {
             toast.error('An error occurred while deleting user');
             setError('An error occurred while deleting user');
-        }finally{
+        } finally {
             setLoading(false);
         }
     }
-     function handleupdateUser(id:number){
-       router.push('/Admin/Dashboard/'+id);
+    function handleupdateUser(id: number) {
+        router.push('/Admin/Dashboard/' + id);
     }
-     
+    const filteredUsers = useMemo(() => {
+        if (!searchText.trim()) return users;
+        console.log("SearchText", searchText);
+
+        return users.filter((user) =>
+            user.userName.toLowerCase().includes(searchText.toLowerCase())
+        );
+    }, [users, searchText]);
+
+    function GoToCategory()
+    {
+        router.push('/Admin/AddCategory')
+    }
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <h1>Desktop Data Fetcher</h1>
+            <h1>Desktop Data </h1>
             <button
-                onClick={handleFetchData}
-                style={{
-                    padding: '10px 20px',
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    marginBottom: '20px',
-                }}
-                disabled={loading}
-            >   
-                {loading ? 'Loading...' : 'Fetch Desktop Data'}
+                type="button"
+                onClick={() => GoToCategory()} // ✅ Pass user ID
+                style={{ padding: '6px 12px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+                Update
             </button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {count !== 0 && <p>Data Count: {count}</p>}
-
-            {users.length > 0 && (
+            <label>serach userName</label>
+            <input id="searchbox" value={searchText} className='ml-10 p-4 w-30 bg-gray h-10' onChange={(e) => setSearchText(e.target.value)}></input>
+            {filteredUsers.length > 0 && (
                 <div style={{ marginTop: '20px' }}>
                     <h2>Users</h2>
                     <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
@@ -108,10 +119,12 @@ export default function DesktopPage() {
                                 <th style={tableHeaderStyle}>ID</th>
                                 <th style={tableHeaderStyle}>Name</th>
                                 <th style={tableHeaderStyle}>Email</th>
+                                <th style={tableHeaderStyle}>DELETE ACTION</th>
+                                <th style={tableHeaderStyle}>EDIT ACTION</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((user) => (
+                            {filteredUsers.map((user) => (
                                 <tr key={user._id}>
                                     <td style={tableCellStyle}>{user._id}</td>
                                     <td style={tableCellStyle}>{user.userName}</td>
@@ -124,8 +137,8 @@ export default function DesktopPage() {
                                         >
                                             Delete
                                         </button>
-                                        </td>
-                                         <td style={tableCellStyle}>
+                                    </td>
+                                    <td style={tableCellStyle}>
                                         <button
                                             type="button"
                                             onClick={() => handleupdateUser(user._id)} // ✅ Pass user ID
@@ -133,19 +146,20 @@ export default function DesktopPage() {
                                         >
                                             Update
                                         </button>
-                                        </td>
-                                     </tr>
+                                    </td>
+                                </tr>
                             ))}
                         </tbody>
                     </table>
+
                 </div>
             )}
         </div>
 
-        
+
 
     )
-    
+
 }
 const tableHeaderStyle = {
     border: '1px solid #ccc',
