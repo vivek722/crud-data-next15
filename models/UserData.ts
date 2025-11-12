@@ -26,16 +26,16 @@ const userSchema = new Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// 🔑 Auto-increment middleware
+
 userSchema.pre('save', async function (next) {
   if (this.isNew) {
     try {
       const counter = await Counter.findByIdAndUpdate(
-        { _id: 'User' },        // ← Use 'User' as the key
-        { $inc: { seq: 1 } },   // ← Increment by 1
+        { _id: 'User' },        
+        { $inc: { seq: 1 } },  
         { new: true, upsert: true }
       );
-      this._id = counter!.seq; // ← Assign to _id
+      this._id = counter!.seq; 
     } catch (err) {
       return next(err as any);
     }

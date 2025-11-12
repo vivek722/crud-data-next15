@@ -26,11 +26,11 @@ Categoryschema.pre('save', async function (next) {
     if (this.isNew) {
       try {
         const counter = await Counter.findByIdAndUpdate(
-          { _id: 'User' },        // ← Use 'User' as the key
-          { $inc: { seq: 1 } },   // ← Increment by 1
+          { _id: 'User' },        
+          { $inc: { seq: 1 } },  
           { new: true, upsert: true }
         );
-        this._id = counter!.seq; // ← Assign to _id
+        this._id = counter!.seq; 
       } catch (err) {
         return next(err as any);
       }
@@ -38,4 +38,4 @@ Categoryschema.pre('save', async function (next) {
     next();
   });
 
-export default mongoose.models.Categoryschema || mongoose.model<Category>("Category",Categoryschema)
+export default mongoose.models.Category || mongoose.model<Category>("Category",Categoryschema)

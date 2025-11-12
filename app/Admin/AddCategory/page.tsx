@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
+import Image from 'next/image';
+import { useCategoryStore } from '@/store/categoryStore';
 
 export default function AddCategoryPage() {
   const router = useRouter();
-//   : '',
-//   description: '',
-//   parentId: '',
-//   image: null as File | null,
-//   isActive: true,
-//   sortOrder: 0
   const [name, setname] = useState('');
   const [slug, setslug] = useState('')
   const [description, setdescription] = useState('')
@@ -19,26 +16,29 @@ export default function AddCategoryPage() {
   const [image, setimage] = useState<File | null>(null)
   const [isActive, setisActive] = useState(false)
 
-  
+
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]); // Initialize as empty array
+  const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [reloadTrigger, setReloadTrigger] = useState(0);
 
-  // Load categories for parent selection
+  const { categories: catgoryDat, loading: loadingCategoriesdata, error, fetchCategories } = useCategoryStore();
+
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [reloadTrigger]);
 
   const loadCategories = async () => {
     try {
       setLoadingCategories(true);
-      const response = await fetch('/api/user/Addcategory');
-      const data = await response.json();
-      setCategories(data.categories || []); // Ensure it's an array
+      const response = await axios.get('/api/user/Addcategory');
+      console.log("data", response);
+
+      setCategories(response.data.Allcategory || []);
     } catch (error) {
       console.error('Error loading categories:', error);
-      setCategories([]); // Set empty array on error
+      setCategories([]);
       toast.error('Failed to load categories');
     } finally {
       setLoadingCategories(false);
@@ -49,8 +49,7 @@ export default function AddCategoryPage() {
     const file = e.target.files?.[0];
     if (file) {
       setimage(file);
-      
-      // Create preview
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
@@ -68,7 +67,7 @@ export default function AddCategoryPage() {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
-    
+
     setslug(slug);
   };
 
@@ -77,44 +76,45 @@ export default function AddCategoryPage() {
       toast.error('Category name is required');
       return false;
     }
-    
+
     if (!slug.trim()) {
       toast.error('Slug is required');
       return false;
     }
-    
+
     if (name.length < 2) {
       toast.error('Category name must be at least 2 characters');
       return false;
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
-    
+
     try {
-      const response = await fetch('/api/user/Addcategory', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({  name,slug,description,image,isActive}),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        toast.success('Category created successfully!');
-        router.push('/categories'); // Redirect to categories list
-      } else {
-        toast.error(result.message || 'Failed to create category');
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('slug', slug);
+      formData.append('description', description);
+      if (image) {
+        formData.append('image', image);
       }
+      formData.append('isActive', isActive.toString()); 
+
+      const response = await axios.post('/api/user/Addcategory', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', 
+        },
+      });
+      toast.success('Category created successfully!');
+      setReloadTrigger(prev => prev + 1);
+      useCategoryStore.getState().addCategory(response.data.category);
     } catch (error) {
       console.error('Error creating category:', error);
       toast.error('An error occurred while creating the category');
@@ -123,18 +123,64 @@ export default function AddCategoryPage() {
     }
   };
 
+  async function handleDeleteUser(_id: any) {
+
+    setLoading(true);
+    try {
+      const response = await axios.put(`api/user/Addcategory/${_id}`)
+      toast.success(`delete successfully this record  id : ${_id} `)
+      useCategoryStore.getState().deleteCategory(_id)
+    }
+    catch (err) {
+      console.error('Error creating category:', error);
+      toast.error('An error occurred while creating the category');
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleUpdateUser(_id: any) {
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('slug', slug);
+      formData.append('description', description);
+      if (image) {
+        formData.append('image', image);
+      }
+      formData.append('isActive', isActive.toString());
+      const response = await axios.put(`api/user/Addcategory/${_id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Important!
+        },
+      });
+      toast.success(`update successfully this record  id : ${_id} `)
+      useCategoryStore.getState().updateCategory(_id)
+    }
+    catch (err) {
+      console.error('Error creating category:', error);
+      toast.error('An error occurred while creating the category');
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Add New Category</h1>
           <p className="text-gray-600 mt-2">Create a new product category for your store</p>
         </div>
 
-        {/* Form */}
+
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-          {/* Category Name */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -145,7 +191,7 @@ export default function AddCategoryPage() {
                 id="name"
                 name="name"
                 value={name}
-                onChange={(e)=>setname(e.target.value)}
+                onChange={(e) => setname(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter category name"
                 required
@@ -163,7 +209,7 @@ export default function AddCategoryPage() {
                   id="slug"
                   name="slug"
                   value={slug}
-                  onChange={(e)=> setslug(e.target.value)}
+                  onChange={(e) => setslug(e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="category-slug"
                   required
@@ -189,7 +235,7 @@ export default function AddCategoryPage() {
               id="description"
               name="description"
               value={description}
-              onChange={(e)=>setdescription(e.target.value)}
+              onChange={(e) => setdescription(e.target.value)}
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter category description..."
@@ -216,7 +262,7 @@ export default function AddCategoryPage() {
                 >
                   <option value="">No Parent (Top Level)</option>
                   {categories.map((category) => (
-                    <option  key={category._id} value={category._id}  onChange={(e)=>setparentId(category._id)}>
+                    <option key={category._id} value={category._id} onChange={(e) => setparentId(category._id)}>
                       {category.name}
                     </option>
                   ))}
@@ -234,9 +280,9 @@ export default function AddCategoryPage() {
             <div className="flex items-center space-x-6">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 w-32 h-32 flex items-center justify-center">
                 {previewImage ? (
-                  <img 
-                    src={previewImage} 
-                    alt="Preview" 
+                  <img
+                    src={previewImage}
+                    alt="Preview"
                     className="w-full h-full object-cover rounded"
                   />
                 ) : (
@@ -247,7 +293,7 @@ export default function AddCategoryPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex-1">
                 <input
                   type="file"
@@ -281,7 +327,7 @@ export default function AddCategoryPage() {
                 id="isActive"
                 name="isActive"
                 checked={isActive}
-                onChange={(e)=>setisActive(true)}
+                onChange={(e) => setisActive(true)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
@@ -320,6 +366,93 @@ export default function AddCategoryPage() {
           </div>
         </form>
       </div>
+
+      <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', alignItems: 'center' }}>
+        <h1 style={{ color: 'black', display: 'flex', justifyContent: 'center', fontWeight: "bold" }}>Category Data </h1>
+        {/* {error && <p style={{ color: 'red' }}>{error}</p>}
+            {count !== 0 && <p>Data Count: {count}</p>}
+            <label>serach userName</label>
+            <input id="searchbox" value={searchText} className='ml-10 p-4 w-30 bg-gray h-10' onChange={(e) => setSearchText(e.target.value)}></input> */}
+        {categories.length > 0 && (
+          <div style={{ marginTop: '20px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+              <thead>
+                <tr>
+                  <th style={tableHeaderStyle}>ID</th>
+                  <th style={tableHeaderStyle}>Image</th>
+                  <th style={tableHeaderStyle}>Name</th>
+                  <th style={tableHeaderStyle}>slug</th>
+                  <th style={tableHeaderStyle}>Parent category</th>
+                  <th style={tableHeaderStyle}>Description</th>
+                  <th style={tableHeaderStyle}>Is Active</th>
+                  <th style={tableHeaderStyle}>DELETE ACTION</th>
+                  <th style={tableHeaderStyle}>EDIT ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((user) => (
+                  <tr key={user._id}>
+                    <td style={tableCellStyle}>{user._id}</td>
+                    <td style={tableCellStyle}>{user.image ? (
+                      <Image
+                        src={user.image}
+                        alt={user.name}
+                        width={50}
+                        height={50}
+                        unoptimized // This disables Next.js image optimization
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <span>No Image</span>
+                    )}</td>
+                    <td style={tableCellStyle}>{user.name}</td>
+                    <td style={tableCellStyle}>{user.slug}</td>
+                    <td style={tableCellStyle}>{user.parentId}</td>
+                    <td style={tableCellStyle}>{user.description}</td>
+                    <td style={tableCellStyle}>{user.isActive}</td>
+                    <td style={tableCellStyle}>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteUser(user._id)} // ✅ Pass user ID
+                        style={{ padding: '6px 12px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                    <td style={tableCellStyle}>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateUser(user._id)} // ✅ Pass user ID
+                        style={{ padding: '6px 12px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+const tableHeaderStyle = {
+  border: '1px solid #ccc',
+  padding: '10px',
+  backgroundColor: '#000000ff',
+  textAlign: 'left' as const,
+};
+
+const tableCellStyle = {
+  border: '1px solid #ccc',
+  padding: '10px',
+  backgroundColor: '#000',
+  whiteSpace: 'normal',
+  overflowWrap: 'break-word' as React.CSSProperties['overflowWrap'],
+  maxWidth: '250px',
+  verticalAlign: 'top',
+};

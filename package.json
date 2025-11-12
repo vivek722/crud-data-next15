@@ -9,15 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.29.1",
     "@tanstack/react-table": "^8.21.3",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3",
     "next": "16.0.1",
     "react": "19.2.0",
+    "react-cookie": "^8.0.1",
     "react-dom": "19.2.0",
+    "react-error-boundary": "^6.0.0",
     "react-hot-toast": "^2.6.0",
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

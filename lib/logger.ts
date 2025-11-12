@@ -1,4 +1,4 @@
-// lib/logger.js
+
 import { createLogger, format, transports } from 'winston';
 
 const { combine, timestamp, printf, errors, json } = format;
