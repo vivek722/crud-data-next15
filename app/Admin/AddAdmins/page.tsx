@@ -3,12 +3,13 @@ import  React, { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import  {Roles} from '@/Constants/Role'
+import axios from 'axios'
 export default function LoginPage() {
     const router = useRouter();
     const [userName, setUserName] = useState('');
-    const [userEmail, setUserEmail] = useState('');
+    const [email, setUserEmail] = useState('');
     const [Phone, setUserPhone] = useState('');
-    const [userPassword, setUserPassword] = useState('');
+    const [password, setUserPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false)
 
@@ -22,19 +23,19 @@ export default function LoginPage() {
             setError('userName is required');
             return false;
         }
-        if(!userEmail){
+        if(!email){
             setError('Email is required');
             return false;
         }
-        else if(userEmail.indexOf('@')===-1){
+        else if(email.indexOf('@')===-1){
             setError('Please enter valid email address');
             return false;
         }
-        if(!userPassword){
+        if(!password){
             setError('Password is required');
             return false;
         }
-        else if(userPassword.length <6){
+        else if(password.length <6){
             setError('Password must be at least 6 characters long');
             return false;
         }
@@ -42,7 +43,7 @@ export default function LoginPage() {
             setError('Phone is required');
             return false;
         }
-        else if(userPassword.length  ==10){
+        else if(password.length  ==10){
             setError('phone  No must be at have 10 digit');
             return false;
         }
@@ -60,22 +61,11 @@ export default function LoginPage() {
             return;
         }
         try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userName,  userEmail, Phone, userPassword,Role,isActive,Emailverified}),
+            const response = await axios.post('/api/auth/register', {
+                 userName,  email, Phone, password,Role,isActive,Emailverified
             });
-
-             const data = await response.json();
-            if (response.ok) {
-                toast.success('Registration successful!');
-                router.push('/Admin/Dashboard');
-            } else {
-                toast.error(data.message || 'An error occurred during login');
-                setError(data.message || 'An error occurred during login');
-            }
+            toast.success('Registration successful!');
+            router.push('/Admin/Dashboard');
         } catch (error) {
             toast.error('An error occurred during login');
             setError('An error occurred during login');
@@ -110,7 +100,7 @@ export default function LoginPage() {
                             type="email"
                             id="email"      
                             className="w-full px-3 py-2 border rounded"
-                            value={userEmail}
+                            value={email}
                             onChange={(e) => setUserEmail(e.target.value)}
                             required
                         />
@@ -132,7 +122,7 @@ export default function LoginPage() {
                             type="password"
                             id="password"
                             className="w-full px-3 py-2 border rounded"
-                            value={userPassword}
+                            value={password}
                             onChange={(e) => setUserPassword(e.target.value)}
                             required
                         />

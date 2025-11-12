@@ -2,8 +2,8 @@
 import { Schema, model, models } from 'mongoose';
 
 const counterSchema = new Schema({
-  _id: { type: String, required: true }, // e.g., "User"
-  seq: { type: Number, default: 1000 }   // Start from 1001
+  _id: { type: String, required: true }, 
+  seq: { type: Number, default: 1000 }   
 });
 
 const Counter = models.Counter || model('Counter', counterSchema);

@@ -4,10 +4,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast'
+import axios from 'axios';
 interface User {
   _id: string;
   userName: string;
-  userEmail: string;
+  email: string;
 }
 
 export default function EditUserPage() {
@@ -25,11 +26,10 @@ export default function EditUserPage() {
       try {
         console.log("call get APi");
         
-        const res = await fetch(`/api/user/Desktop?id=${userId}`);
-        const data = await res.json();
-        if (data.status && data.users?.[0]) {
-          setUser(data.users[0]);
-          toast.success(`this ${data.users[0]?.userName} User data loaded`);
+        const res = await axios.get(`/api/user/Desktop?id=${userId}`);
+        if (res.data.status &&res.data.users?.[0]) {
+          setUser(res.data.users[0]);
+          toast.success(`this ${res.data.users[0]?.userName} User data loaded`);
         }
       } catch (error) {
         toast.error('Error loading user data');
@@ -47,24 +47,13 @@ export default function EditUserPage() {
 
     setSaving(true);
     try {
-      const res = await fetch('/api/user/Desktop', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = await axios.put('/api/user/Desktop', {
           userId: user._id,
           userName: user.userName,
-          userEmail: user.userEmail,
-        }),
+          email: user.email,
       });
-
-      if (res.ok) {
-        toast.success('User updated successfully');
-         router.push('/Admin/Dashboard');// or '/desktop'
-      } else {
-        toast.error('Update failed');
-        const err = await res.json();
-        console.error('Update error:', err);
-      }
+      toast.success('User updated successfully');
+      router.push('/Admin/Dashboard');// or '/desktop'
     } catch (error) {
         toast.error('An error occurred while updating');
         console.error('Error updating user:', error);
@@ -93,8 +82,8 @@ export default function EditUserPage() {
           <label>Email:</label>
           <input
             type="email"
-            value={user.userEmail}
-            onChange={(e) => setUser({ ...user, userEmail: e.target.value })}
+            value={user.email}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
             style={{ width: '100%', padding: '8px' }}
           />
         </div>

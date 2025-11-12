@@ -4,6 +4,7 @@ import User from '@/models/UserData';
 import { compare } from 'bcryptjs';
 import { generateJWT } from '@/utils/auth';
 import { cookies } from 'next/headers';
+
 export async function GET(request: NextRequest) {
     return NextResponse.json({ message: 'Hello from Next.js API!' });
 }
@@ -11,34 +12,42 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         await dbConnect();
-        const { userEmail, userPassword } = await request.json();
-        if (!userEmail || !userPassword) {
+        const { email, password } = await request.json();
+        if (!email || !password) {
             return NextResponse.json(
                 { message: 'All fields are required' },
                 { status: 400 }
             )
         }
-        const user = await User.findOne({ userEmail });
+        const user = await User.findOne({ email });
         if (!user) {
             return NextResponse.json(
                 { message: 'Invalid credentials' },
                 { status: 401 }
             );
         }
-        const PasswordValid = await compare(userPassword, user.userPassword);
+        
+        const PasswordValid = await compare(password, user.password);
         if (!PasswordValid) {
             return NextResponse.json(
                 { message: 'Invalid credentials' },
                 { status: 401 }
             );
         }
+        const payload = {
+            id: user._id,
+            email: user.email,
+            userName: user.userName,
+        };
+        const JWTToken =  await generateJWT(payload)
         return NextResponse.json(
             {
                 message: 'Login successful',
                 user: {
                     id: user._id,
                     userName: user.userName,
-                    userEmail: user.userEmail
+                    email: user.email,
+                    Tokem:JWTToken
                 }
             },
             { status: 200 }

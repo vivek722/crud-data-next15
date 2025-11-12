@@ -38,17 +38,17 @@ export async function serachUser(userName: NextRequest) {
 export async function PUT(request: NextRequest) {
     try{
         await dbConnect();
-        const { userId, userName, userEmail, userPassword } = await request.json();
+        const { userId, userName, email } = await request.json();
         if(!userId){
             return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (userEmail && !emailRegex.test(userEmail)) {
+            if (email && !emailRegex.test(email)) {
             return NextResponse.json({ message: 'Invalid email' }, { status: 400 });
             }
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            { userName, userEmail },
+            { userName, email },
             { new: true ,runValidators: true}
         );
         if(!updatedUser){

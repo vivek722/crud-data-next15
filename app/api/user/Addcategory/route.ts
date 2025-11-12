@@ -3,37 +3,55 @@ import category from "@/models/category";
 import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
 import { request } from "http";
+import { uploadImageToAzure } from "@/lib/azure-storage";
 
 export async function POST(request:NextRequest) {
     try{
         await dbConnect()
-        logger.info("Database Connect successfully")
-        const  {name,slug,description,image,isActive} = await request.json()
+        const formData = await request.formData();
+    
+    const name = formData.get('name') as string;
+    const slug = formData.get('slug') as string;
+    const description = formData.get('description') as string;
+    const isActive = formData.get('isActive') === 'true';
+    const imageFile = formData.get('image') as File | null;
 
-        const newCategory = new category({
-                    name,
-                    slug,
-                    description,
-                    image,
-                    isActive,
-                    
-                });
-        await newCategory.save();
-        console.log('save data inside database');
-        logger.info('save data inside database')
+    // Validation
+    if (!name || !slug) {
+      return NextResponse.json(
+        { message: 'Name and slug are required' },
+        { status: 400 }
+      );
+    }
 
-        const response = NextResponse.json({
-            message: 'Registration successful',
-            user: {
-                id: newCategory._id,
-                name: newCategory.name,
-                slug:newCategory.slug,
-                description: newCategory.description,
-                image : newCategory.image,
-                isActive :newCategory.isActive,
-            }
-        }, { status: 201 });
-        return response;
+    // Handle file upload if image exists
+    let imageUrl = null;
+    if (imageFile) {
+      // Convert File to buffer and save to your preferred storage
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      
+      // Example: Save to public folder (for simple cases)
+      // In production, use cloud storage like AWS S3, Cloudinary, etc.
+      imageUrl = await uploadImageToAzure(buffer, imageFile.name);
+    }
+
+    const newCategory = await category.create({
+      name,
+      slug,
+      description,
+      image: imageUrl, // Store the image URL/path
+      isActive,
+    });
+
+    return NextResponse.json(
+      { 
+        message: 'Category created successfully', 
+        category: newCategory 
+      },
+      { status: 201 }
+    );
+
     }
     catch(err){
         logger.error(`Error insert Category ${err}`)

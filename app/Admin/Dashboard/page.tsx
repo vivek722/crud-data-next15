@@ -5,11 +5,11 @@ import React, { useEffect, useMemo } from 'react'
 import { useState } from 'react'
 import { rootCertificates } from 'tls';
 import toast from 'react-hot-toast'
-
+import axios from 'axios';
 export interface userResponse {
     _id: number;
     userName: string,
-    userEmail: string,
+    email: string,
     userPassword: string
 }
 export default function DesktopPage() {
@@ -28,26 +28,14 @@ export default function DesktopPage() {
         setLoading(true);
         setError('');
         try {
-            const response = await fetch('/api/user/Desktop', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await response.json();
-            if (response.ok) {
-                if (data.users.length === 0) {
+            const response = await axios.get('/api/user/Desktop')
+                if (response.data.users.length === 0) {
                     toast.error('No data   found');
                     setError('No data   found');
                 }
-                setCount(data.users.length);
-                toast.success(`${data.users.length} Data fetched successfully!`);
-                setUsers(data.users);
-            }
-            else {
-                toast.error(data.message || 'An error occurred while fetching data');
-                setError(data.message || 'An error occurred while fetching data');
-            }
+                setCount(response.data.users.length);
+                toast.success(`${response.data.users.length} Data fetched successfully!`);
+                setUsers(response.data.users);
         } catch (error) {
             toast.error('An error occurred while fetching data');
             setError('An error occurred while fetching data');
@@ -59,20 +47,9 @@ export default function DesktopPage() {
         setLoading(true);
         setError('');
         try {
-            const response = await fetch('/api/user/Desktop', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: id }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                toast.success('User deleted successfully');
-                handleFetchData();
-            }
-            else {
-                toast.error(data.message || 'An error occurred while deleting user');
-                setError(data.message || 'An error occurred while deleting user');
-            }
+            const response = await axios.delete(`/api/user/Desktop/${id}`);
+            toast.success('User deleted successfully');
+            handleFetchData();
         } catch (error) {
             toast.error('An error occurred while deleting user');
             setError('An error occurred while deleting user');
@@ -96,6 +73,10 @@ export default function DesktopPage() {
     {
         router.push('/Admin/AddCategory')
     }
+    function GoToProduct()
+    {
+        router.push('/Admin/AddProduct')
+    }
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
             <h1>Desktop Data </h1>
@@ -104,7 +85,14 @@ export default function DesktopPage() {
                 onClick={() => GoToCategory()} // ✅ Pass user ID
                 style={{ padding: '6px 12px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
             >
-                Update
+                Go To  AddCategory
+            </button>
+            <button
+                type="button"
+                onClick={() => GoToProduct()} // ✅ Pass user ID
+                style={{ padding: '6px 12px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            >
+                Go To  AddProduct
             </button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {count !== 0 && <p>Data Count: {count}</p>}
@@ -128,7 +116,7 @@ export default function DesktopPage() {
                                 <tr key={user._id}>
                                     <td style={tableCellStyle}>{user._id}</td>
                                     <td style={tableCellStyle}>{user.userName}</td>
-                                    <td style={tableCellStyle}>{user.userEmail}</td>
+                                    <td style={tableCellStyle}>{user.email}</td>
                                     <td style={tableCellStyle}>
                                         <button
                                             type="button"
@@ -171,4 +159,5 @@ const tableHeaderStyle = {
 const tableCellStyle = {
     border: '1px solid #ccc',
     padding: '10px',
+    
 };

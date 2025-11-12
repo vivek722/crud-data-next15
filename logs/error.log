@@ -1,2 +1,26 @@
 {"level":"error","message":"Error insert user ValidationError: password: Path `password` is required., email: Path `email` is required.","timestamp":"2025-11-11T11:01:09.620Z"}
 {"level":"error","message":"Error insert user ValidationError: password: Path `password` is required., email: Path `email` is required.","timestamp":"2025-11-11T11:02:05.377Z"}
+{"level":"error","message":"Error insert Category SyntaxError: No number after minus sign in JSON at position 1 (line 1 column 2)","timestamp":"2025-11-11T12:23:04.247Z"}
+{"level":"error","message":"Error insert Category SyntaxError: No number after minus sign in JSON at position 1 (line 1 column 2)","timestamp":"2025-11-11T12:23:21.567Z"}
+{"level":"error","message":"Error insert Category ValidationError: image: Cast to string failed for value \"{}\" (type Object) at path \"image\"","timestamp":"2025-11-11T13:00:13.637Z"}
+{"level":"error","message":"Error insert Category ValidationError: image: Cast to string failed for value \"{}\" (type Object) at path \"image\"","timestamp":"2025-11-11T13:01:05.004Z"}
+{"level":"error","message":"Error insert Category ValidationError: image: Cast to string failed for value \"{}\" (type Object) at path \"image\"","timestamp":"2025-11-11T13:03:32.721Z"}
+{"level":"error","message":"Error insert Category ValidationError: image: Cast to string failed for value \"{}\" (type Object) at path \"image\"","timestamp":"2025-11-11T13:03:41.889Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T05:50:30.496Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T05:56:01.626Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:00:33.064Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:00:39.143Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:01:48.811Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:02:06.734Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:04:07.609Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:04:34.260Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:24:34.879Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:27:55.777Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:32:23.859Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:33:05.090Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:45:45.527Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:45:53.526Z"}
+{"level":"error","message":"Error insert user MongoServerError: E11000 duplicate key error collection: NextCrud.users index: userEmail_1 dup key: { userEmail: null }","timestamp":"2025-11-12T06:46:02.754Z"}
+{"level":"error","message":"Error insert Category ValidationError: image: Cast to string failed for value \"{}\" (type Object) at path \"image\"","timestamp":"2025-11-12T06:56:38.558Z"}
+{"level":"error","message":"Error insert Category SyntaxError: No number after minus sign in JSON at position 1 (line 1 column 2)","timestamp":"2025-11-12T07:06:42.636Z"}
+{"level":"error","message":"Error insert Category MongoServerError: E11000 duplicate key error collection: NextCrud.categories index: slug_1 dup key: { slug: \"t-shirt\" }","timestamp":"2025-11-12T07:38:30.416Z"}
