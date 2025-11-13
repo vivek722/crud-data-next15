@@ -52,28 +52,27 @@ function verifyAuth(req: NextRequest) {
   }
 }
 
-// ==========================
-// CREATE PRODUCT
-// ==========================
+// =============================
+// CREATE PRODUCT (POST)
+// =============================
 export async function POST(request: NextRequest) {
   try {
     const user = verifyAuth(request);
     if (!user) {
-      logger.error("Unauthorized to create Product");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await dbConnect();
-    const body = await request.json();
-    const product = await Product.create(body);
+    const data = await request.json();
+    const product = await Product.create(data);
 
     return NextResponse.json(
-      { status: true, message: "Created", product },
+      { status: true, message: "Product created", product },
       { status: 201 }
     );
 
-  } catch (err) {
-    logger.error(`Create Product Error: ${err}`);
+  } catch (err: any) {
+    logger.error("Create Product Error: " + err);
     return NextResponse.json(
       { status: false, message: "Error creating product" },
       { status: 500 }
@@ -81,9 +80,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ==========================
+// =============================
 // GET ALL PRODUCTS
-// ==========================
+// =============================
 export async function GET() {
 
     try{
@@ -109,9 +108,14 @@ export async function GET() {
 
 
     const products = await Product.find();
-    return NextResponse.json({ status: true, products });
-  } catch (err) {
-    logger.error(`Get Product Error: ${err}`);
+
+    return NextResponse.json(
+      { status: true, products },
+      { status: 200 }
+    );
+
+  } catch (err: any) {
+    logger.error("Get Products Error: " + err);
     return NextResponse.json(
       { status: false, message: "Error fetching products" },
       { status: 500 }
@@ -145,12 +149,19 @@ export async function DELETE(request: NextRequest, { id }: any) {
 // DELETE PRODUCT (BODY: { productId })
 // ==========================
 
+
+// =============================
+// DELETE PRODUCT (expects JSON { productId })
+// =============================
+
 export async function DELETE(request: NextRequest) {
   try {
     const user = verifyAuth(request);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    await dbConnect();
 
     const raw = await request.text();
     const { productId } = JSON.parse(raw || "{}");
@@ -163,7 +174,6 @@ export async function DELETE(request: NextRequest) {
 
     }
 
-    await dbConnect();
     const deleted = await Product.findByIdAndDelete(productId);
 
     if (!deleted) {
@@ -239,10 +249,13 @@ export async function DELETE(request: NextRequest) {
 //   }
 // }
 
-    return NextResponse.json({ status: true, deleted }, { status: 200 });
+    return NextResponse.json(
+      { status: true, message: "Product deleted", deleted },
+      { status: 200 }
+    );
 
-  } catch (err) {
-    logger.error(`Delete Product Error: ${err}`);
+  } catch (err: any) {
+    logger.error("Delete Product Error: " + err);
     return NextResponse.json(
       { status: false, message: "Error deleting product" },
       { status: 500 }
