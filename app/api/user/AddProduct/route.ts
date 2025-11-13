@@ -38,26 +38,42 @@ export async function Post(request:NextRequest) {
     } 
 
 import logger from "@/lib/logger";
+import jwt from "jsonwebtoken";
 
-// =========================
-// CREATE PRODUCT (POST)
-// =========================
+function verifyAuth(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) return null;
+
+  const token = authHeader.replace("Bearer ", "");
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET!);
+  } catch {
+    return null;
+  }
+}
+
+// ==========================
+// CREATE PRODUCT
+// ==========================
 export async function POST(request: NextRequest) {
   try {
+    const user = verifyAuth(request);
+    if (!user) {
+      logger.error("Unauthorized to create Product");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await dbConnect();
-    logger.info("Database connected successfully");
-
     const body = await request.json();
-
-    const created = await Product.create(body);
+    const product = await Product.create(body);
 
     return NextResponse.json(
-      { status: true, message: "Product created", product: created },
+      { status: true, message: "Created", product },
       { status: 201 }
     );
 
   } catch (err) {
-    logger.error(`Product create error: ${err}`);
+    logger.error(`Create Product Error: ${err}`);
     return NextResponse.json(
       { status: false, message: "Error creating product" },
       { status: 500 }
@@ -65,9 +81,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// =========================
+// ==========================
 // GET ALL PRODUCTS
-// =========================
+// ==========================
 export async function GET() {
 
     try{
@@ -87,24 +103,22 @@ export async function GET() {
 
   try {
     await dbConnect();
+
     logger.info("Database connected successfully");
 
 
+
     const products = await Product.find();
-
-    return NextResponse.json(
-      { status: true, products },
-      { status: 200 }
-    );
-
+    return NextResponse.json({ status: true, products });
   } catch (err) {
-    logger.error(`Fetch products error: ${err}`);
+    logger.error(`Get Product Error: ${err}`);
     return NextResponse.json(
       { status: false, message: "Error fetching products" },
       { status: 500 }
     );
   }
 }
+
 
 
 export async function DELETE(request: NextRequest, { id }: any) {
@@ -126,27 +140,35 @@ export async function DELETE(request: NextRequest, { id }: any) {
 // =========================
 // DELETE PRODUCT (ID from BODY)
 // =========================
+
+// ==========================
+// DELETE PRODUCT (BODY: { productId })
+// ==========================
+
 export async function DELETE(request: NextRequest) {
   try {
+    const user = verifyAuth(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const raw = await request.text();
-    const body = JSON.parse(raw || "{}");
-    const { productId } = body;
+    const { productId } = JSON.parse(raw || "{}");
 
     if (!productId) {
       return NextResponse.json(
-        { status: false, message: "Product ID is required" },
+        { error: "productId is required" },
         { status: 400 }
       );
 
     }
 
     await dbConnect();
-
     const deleted = await Product.findByIdAndDelete(productId);
 
     if (!deleted) {
       return NextResponse.json(
-        { status: false, message: "Product not found" },
+        { error: "Product not found" },
         { status: 404 }
       );
     }
@@ -217,13 +239,10 @@ export async function DELETE(request: NextRequest) {
 //   }
 // }
 
-    return NextResponse.json(
-      { status: true, message: "Product deleted", deleted },
-      { status: 200 }
-    );
+    return NextResponse.json({ status: true, deleted }, { status: 200 });
 
   } catch (err) {
-    logger.error(`Delete product error: ${err}`);
+    logger.error(`Delete Product Error: ${err}`);
     return NextResponse.json(
       { status: false, message: "Error deleting product" },
       { status: 500 }
