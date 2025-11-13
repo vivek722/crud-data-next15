@@ -2,10 +2,22 @@ import { NextRequest,NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import User from "@/models/UserData";
 import logger from "@/lib/logger";
-
+import  jwt from "jsonwebtoken";
+function verifyAuth(req: NextRequest) {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) return null;
+  
+    const token = authHeader.replace("Bearer ", "");
+    try {
+      return jwt.verify(token, process.env.JWT_SECRET!);
+    } catch {
+      return null;
+    }
+  }
 
 export async function GET(request: NextRequest) {
     try {
+        
         await dbConnect();
         const users = await User.find({});
         return NextResponse.json({ status: true, users }, { status: 200 });
@@ -27,6 +39,7 @@ export async function GETById(id: NextRequest) {
 
 export async function serachUser(userName: NextRequest) {
     try {
+        
         await dbConnect();
         const users = await User.find(userName  );
         return NextResponse.json({ status: true, users }, { status: 200 });
@@ -37,6 +50,11 @@ export async function serachUser(userName: NextRequest) {
 }
 export async function PUT(request: NextRequest) {
     try{
+        var user = await verifyAuth(request)
+        if(!user){
+         logger.error("You are not Unauthorized to update userData")
+         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         await dbConnect();
         const { userId, userName, email } = await request.json();
         if(!userId){
@@ -64,6 +82,11 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     try{
+        var user = await verifyAuth(request)
+        if(!user){
+         logger.error("You are not Unauthorized to Delete user")
+         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         await dbConnect();
         const { userId } = await request.json();
         if(!userId){

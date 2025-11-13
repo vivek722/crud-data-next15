@@ -4,16 +4,16 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { Roles } from '@/Constants/Role'
 import axios from 'axios'
-import { ErrorBoundary } from 'react-error-boundary'
-
+import { useLoading } from '@/Hooks/useLoading'
 export default function LoginPage() {
+  const {loading,startLoading,stopLoading} = useLoading()
   const router = useRouter();
   const [userName, setUserName] = useState('');
   const [email, setUserEmail] = useState('');
   const [Phone, setUserPhone] = useState('');
   const [password, setUserPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false)
+
 
 
   const Role = Roles.customer;
@@ -51,22 +51,13 @@ export default function LoginPage() {
     }
     return true;
   }
-
-  function Fallback({ error, resetErrorBoundary }: any) {
-    return (
-      <div>
-        <pre>{error.message}</pre>
-        <button onClick={resetErrorBoundary}>Try again</button>
-      </div>
-    );
-  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    startLoading();
     setError('');
 
     if (!validateform()) {
-      setLoading(false);
+      stopLoading();
       return;
     }
 
@@ -105,18 +96,13 @@ export default function LoginPage() {
         setError('An unexpected error occurred');
       }
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   };
   function setSignInPage() {
     router.push('/auth/Login');
   }
   return (
-
-    <ErrorBoundary
-      FallbackComponent={Fallback}
-      onReset={() => console.log('Reset triggered')}
-    >
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="max-w-md w-full bg-white p-8 rounded shadow">
           <h2 className="text-2xl font-bold mb-6 text-center">Sign up to Your Account</h2>
@@ -183,6 +169,6 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
-    </ErrorBoundary>
+   
   )
 }

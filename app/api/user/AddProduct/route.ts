@@ -1,10 +1,30 @@
 import dbConnect from "@/lib/db";
 import { NextRequest,NextResponse } from "next/server";
 import Product from "@/models/Product";
-import { request } from "http";
+
 import logger from '@/lib/logger';
+import jwt from "jsonwebtoken";
+
+function verifyAuth(req: NextRequest) {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) return null;
+  
+    const token = authHeader.replace("Bearer ", "");
+    try {
+      return jwt.verify(token, process.env.JWT_SECRET!);
+    } catch {
+      return null;
+    }
+  }
+
 export async function Post(request:NextRequest) {
     try{
+        
+        const user = verifyAuth(request);
+        if (!user) {
+          logger.error("You are not Unauthorized to create Product")
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         await dbConnect();
         logger.info("Database Connect successfully")
         const  {name,slug,description,shortDescription,sku,price,comparePrice,costPrice,taxClass,weight,dimensions,inventoryTracking,stockQuantity,minStockLevel,isActive,isFeatured,metaTitle,metaDescription} = await request.json()
@@ -19,7 +39,8 @@ export async function Post(request:NextRequest) {
 
 export async function GET() {
     try{
-        await dbConnect
+       
+        await dbConnect()
         logger.info("Database Connect successfully")
         const product = await Product.find();
         return NextResponse.json({ status: true, product }, { status: 200 });
@@ -47,8 +68,13 @@ export async function GETById(id:number) {
     }
 }
 
-export async function DELETE(id:number) {
+export async function DELETE(request: NextRequest, { id }: any) {
     try{
+        const user = verifyAuth(request);
+        if (!user) {
+            logger.error("You are not Unauthorized to create Product")
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+          }
         await dbConnect
         logger.info("Database Connect successfully")
         const deletedProduct = await Product.findByIdAndDelete({id});
@@ -68,6 +94,11 @@ export async function DELETE(id:number) {
 
 // export async function PUT(request: NextRequest) {
 //   try {
+    // const user = verifyAuth(request);
+    // if (!user) {
+    //     logger.error("You are not Unauthorized to create Product")
+    //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    //   }
 //     await dbConnect();
 //     logger.info("Database connected successfully");
 

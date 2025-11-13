@@ -3,15 +3,17 @@ import React, { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import axios from 'axios'
-import { ErrorBoundary } from 'react-error-boundary'
 import { useAuthStore } from '@/store/AuthStore'
 import { setAuthCookie } from '@/lib/cookie'
+import { useLoading } from '@/Hooks/useLoading'
+
 export default function LoginPage() {
+    const { loading, startLoading, stopLoading } = useLoading();
     const router = useRouter();
     const [email, setUserEmail] = useState('');
     const [password, setUserPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false)
+
 
     const { login } = useAuthStore();
     const validateform = () => {
@@ -33,22 +35,13 @@ export default function LoginPage() {
         }
         return true;
     }
-
-    function Fallback({ error, resetErrorBoundary }: any) {
-        return (
-            <div>
-                <pre>{error.message}</pre>
-                <button onClick={resetErrorBoundary}>Try again</button>
-            </div>
-        );
-    }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        startLoading();
         setError('');
 
         if (!validateform()) {
-            setLoading(false);
+            stopLoading();
             return;
         }
 
@@ -56,14 +49,14 @@ export default function LoginPage() {
             const response = await axios.post('/api/auth/Login', {
                 email, password,
             });
+                toast.success('Login successful!');
+                const { user, Token } = response.data.user;
+                console.log("logn Token", Token);
+                console.log("logn user", user);
+                console.log("logn Token", response.data.user.Token);
 
-            toast.success('Login successful!');
-            const { user, token } = response.data.user;
-            console.log("logn Token", response.data.user);
-
-            login(user, token);
-            setAuthCookie(response.data.user.Token)
-            localStorage.setItem('userData', JSON.stringify(response));
+                login(user, Token);
+                setAuthCookie(response.data.user.Token)
 
             router.push('/Admin/Dashboard');
         } catch (error) {
@@ -71,7 +64,7 @@ export default function LoginPage() {
             setError('An error occurred during login');
             console.error('Login error:', error);
         } finally {
-            setLoading(false);
+            stopLoading();
         }
     }
 
@@ -80,10 +73,6 @@ export default function LoginPage() {
     }
 
     return (
-        <ErrorBoundary
-            FallbackComponent={Fallback}
-            onReset={() => console.log('Reset triggered')}
-        >
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="max-w-md w-full bg-white p-8 rounded shadow">
                     <h2 className="text-2xl font-bold mb-6 text-center">Sign in to Your Account</h2>
@@ -129,6 +118,5 @@ export default function LoginPage() {
                     </form>
                 </div>
             </div>
-        </ErrorBoundary>
     )
 }

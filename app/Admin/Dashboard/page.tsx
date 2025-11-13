@@ -1,10 +1,9 @@
 'use client';
-import { set } from 'mongoose';
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useMemo } from 'react'
 import { useState } from 'react'
-import { rootCertificates } from 'tls';
 import toast from 'react-hot-toast'
+import { api } from '@/lib/api';
 import axios from 'axios';
 export interface userResponse {
     _id: number;
@@ -29,13 +28,13 @@ export default function DesktopPage() {
         setError('');
         try {
             const response = await axios.get('/api/user/Desktop')
-                if (response.data.users.length === 0) {
-                    toast.error('No data   found');
-                    setError('No data   found');
-                }
-                setCount(response.data.users.length);
-                toast.success(`${response.data.users.length} Data fetched successfully!`);
-                setUsers(response.data.users);
+            if (response.data.users.length === 0) {
+                toast.error('No data   found');
+                setError('No data   found');
+            }
+            setCount(response.data.users.length);
+            toast.success(`${response.data.users.length} Data fetched successfully!`);
+            setUsers(response.data.users);
         } catch (error) {
             toast.error('An error occurred while fetching data');
             setError('An error occurred while fetching data');
@@ -47,7 +46,10 @@ export default function DesktopPage() {
         setLoading(true);
         setError('');
         try {
-            const response = await axios.delete(`/api/user/Desktop/${id}`);
+            const response = await api.delete(`user/Desktop`,{
+                data: { userId: id }  ,
+                headers: { "Content-Type": "application/json" }
+            });
             toast.success('User deleted successfully');
             handleFetchData();
         } catch (error) {
@@ -69,12 +71,10 @@ export default function DesktopPage() {
         );
     }, [users, searchText]);
 
-    function GoToCategory()
-    {
+    function GoToCategory() {
         router.push('/Admin/AddCategory')
     }
-    function GoToProduct()
-    {
+    function GoToProduct() {
         router.push('/Admin/AddProduct')
     }
     return (
@@ -159,5 +159,5 @@ const tableHeaderStyle = {
 const tableCellStyle = {
     border: '1px solid #ccc',
     padding: '10px',
-    
+
 };

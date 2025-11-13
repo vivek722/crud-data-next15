@@ -1,9 +1,10 @@
-// app/edit/[id]/page.tsx
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast'
+import { api } from '@/lib/api';
 import axios from 'axios';
 interface User {
   _id: string;
@@ -25,9 +26,9 @@ export default function EditUserPage() {
     const fetchUser = async () => {
       try {
         console.log("call get APi");
-        
+
         const res = await axios.get(`/api/user/Desktop?id=${userId}`);
-        if (res.data.status &&res.data.users?.[0]) {
+        if (res.data.status && res.data.users?.[0]) {
           setUser(res.data.users[0]);
           toast.success(`this ${res.data.users[0]?.userName} User data loaded`);
         }
@@ -47,16 +48,16 @@ export default function EditUserPage() {
 
     setSaving(true);
     try {
-      const res = await axios.put('/api/user/Desktop', {
-          userId: user._id,
-          userName: user.userName,
-          email: user.email,
+      const res = await api.put('/api/user/Desktop', {
+        userId: user._id,
+        userName: user.userName,
+        email: user.email,
       });
       toast.success('User updated successfully');
       router.push('/Admin/Dashboard');// or '/desktop'
     } catch (error) {
-        toast.error('An error occurred while updating');
-        console.error('Error updating user:', error);
+      toast.error('An error occurred while updating');
+      console.error('Error updating user:', error);
     } finally {
       setSaving(false);
     }

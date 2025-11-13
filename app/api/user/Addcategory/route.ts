@@ -2,11 +2,31 @@ import { NextRequest,NextResponse } from "next/server";
 import category from "@/models/category";
 import dbConnect from "@/lib/db";
 import logger from "@/lib/logger";
-import { request } from "http";
 import { uploadImageToAzure } from "@/lib/azure-storage";
+import jwt from "jsonwebtoken";
+import { use } from "react";
 
+
+function verifyAuth(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) return null;
+
+  const token = authHeader.replace("Bearer ", "");
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET!);
+  } catch {
+    return null;
+  }
+}
 export async function POST(request:NextRequest) {
     try{
+       var user = await verifyAuth(request)
+       if(!user){
+        logger.error("You are not Unauthorized to create category")
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+       }
+       
+       
         await dbConnect()
         const formData = await request.formData();
     
@@ -15,6 +35,8 @@ export async function POST(request:NextRequest) {
     const description = formData.get('description') as string;
     const isActive = formData.get('isActive') === 'true';
     const imageFile = formData.get('image') as File | null;
+
+
 
     // Validation
     if (!name || !slug) {
@@ -89,8 +111,13 @@ export async function GETById(id:Number) {
     } 
 }
 
-export async function DELETE(id:Number) {
+export async function DELETE(request:NextRequest,{id}:any) {
     try{
+      var user = await verifyAuth(request)
+      if(!user){
+       logger.error("You are not Unauthorized to create category")
+       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
         await dbConnect()
         logger.info("Database Connect successfully")
         const Allcategory =  await category.findByIdAndDelete(id);

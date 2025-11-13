@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import AppErrorBoundary  from '@/Components/AppErrorBoundary'
 import "./globals.css";
 import { Toaster } from 'react-hot-toast'; 
 export default function RootLayout({
@@ -10,6 +9,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body >
+      <AppErrorBoundary>
         {children}
         <Toaster
            position="top-right"
@@ -33,9 +33,9 @@ export default function RootLayout({
                 secondary: '#333',
               },
             }
-           
            }}
           />
+          </AppErrorBoundary>
       </body>
     </html>
   );
