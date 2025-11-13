@@ -3,15 +3,16 @@ import  React, { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import  {Roles} from '@/Constants/Role'
-import axios from 'axios'
+import {api} from '@/lib/api'
+import {useLoading} from '@/Hooks/useLoading'
 export default function LoginPage() {
+    const {loading,startLoading,stopLoading} = useLoading();
     const router = useRouter();
     const [userName, setUserName] = useState('');
     const [email, setUserEmail] = useState('');
     const [Phone, setUserPhone] = useState('');
     const [password, setUserPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false)
 
  
      const Role =Roles.admin;
@@ -53,15 +54,15 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        startLoading();
         setError('');
 
         if(!validateform()){
-            setLoading(false);
+            stopLoading();
             return;
         }
         try {
-            const response = await axios.post('/api/auth/register', {
+            const response = await api.post('/api/auth/register', {
                  userName,  email, Phone, password,Role,isActive,Emailverified
             });
             toast.success('Registration successful!');
@@ -71,7 +72,7 @@ export default function LoginPage() {
             setError('An error occurred during login');
             console.error('Login error:', error);
         } finally {
-            setLoading(false);
+            stopLoading();
         }
     }
     function setSignInPage(){

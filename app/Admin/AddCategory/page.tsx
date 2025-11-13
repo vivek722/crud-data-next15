@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import {api} from '@/lib/api'
 import Image from 'next/image';
+import { useLoading } from '@/Hooks/useLoading';
 import { useCategoryStore } from '@/store/categoryStore';
 
 export default function AddCategoryPage() {
+  const {loading,startLoading,stopLoading} = useLoading()
   const router = useRouter();
   const [name, setname] = useState('');
   const [slug, setslug] = useState('')
@@ -18,7 +21,6 @@ export default function AddCategoryPage() {
 
 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -94,8 +96,7 @@ export default function AddCategoryPage() {
     e.preventDefault();
 
     if (!validateForm()) return;
-
-    setLoading(true);
+    startLoading();
 
     try {
       const formData = new FormData();
@@ -107,7 +108,7 @@ export default function AddCategoryPage() {
       }
       formData.append('isActive', isActive.toString()); 
 
-      const response = await axios.post('/api/user/Addcategory', formData, {
+      const response = await api.post('/api/user/Addcategory', formData, {
         headers: {
           'Content-Type': 'multipart/form-data', 
         },
@@ -115,34 +116,35 @@ export default function AddCategoryPage() {
       toast.success('Category created successfully!');
       setReloadTrigger(prev => prev + 1);
       useCategoryStore.getState().addCategory(response.data.category);
+      stopLoading();
     } catch (error) {
       console.error('Error creating category:', error);
       toast.error('An error occurred while creating the category');
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   };
 
   async function handleDeleteUser(_id: any) {
-
-    setLoading(true);
+    startLoading();
     try {
-      const response = await axios.put(`api/user/Addcategory/${_id}`)
+      const response = await api.delete(`api/user/Addcategory/${_id}`)
       toast.success(`delete successfully this record  id : ${_id} `)
       useCategoryStore.getState().deleteCategory(_id)
+      stopLoading();
     }
     catch (err) {
       console.error('Error creating category:', error);
       toast.error('An error occurred while creating the category');
     }
     finally {
-      setLoading(false);
+      stopLoading();
     }
   }
 
   async function handleUpdateUser(_id: any) {
 
-    setLoading(true);
+    startLoading();
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -152,20 +154,21 @@ export default function AddCategoryPage() {
         formData.append('image', image);
       }
       formData.append('isActive', isActive.toString());
-      const response = await axios.put(`api/user/Addcategory/${_id}`, formData, {
+      const response = await api.put(`api/user/Addcategory/${_id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // Important!
         },
       });
       toast.success(`update successfully this record  id : ${_id} `)
       useCategoryStore.getState().updateCategory(_id)
+      stopLoading();              
     }
     catch (err) {
       console.error('Error creating category:', error);
       toast.error('An error occurred while creating the category');
     }
     finally {
-      setLoading(false);
+      stopLoading();
     }
   }
 

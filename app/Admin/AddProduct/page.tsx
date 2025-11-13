@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useCategoryStore } from '@/store/categoryStore';
 import { toast } from 'react-hot-toast';
-import Image from 'next/image';
-import { ErrorBoundary } from "react-error-boundary";
-
+import axios from 'axios';
+import {api} from '@/lib/api'
+import {useLoading} from '@/Hooks/useLoading'
 interface Product {
   _id: number;
   name: string;
@@ -37,8 +37,9 @@ interface Product {
 }
 
 export default function ProductPage() {
+  const {loading ,startLoading,stopLoading} = useLoading()
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Omit<Product, '_id' | 'createdAt' | 'updatedAt'>>({
@@ -109,19 +110,16 @@ export default function ProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+      startLoading();
     try {
-      const response = await fetch('/api/user/AddProduct', {
+      const response = await api.post('/api/user/AddProduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
-      if (response.ok) {
-        const newProduct = await response.json();
-        setProducts(prev => [...prev, newProduct.product]);
+        setProducts(prev => [...prev, response.data.product]);
         toast.success('Product created successfully!');
-
+        stopLoading();
         setFormData({
           name: '',
           slug: '',
@@ -144,18 +142,10 @@ export default function ProductPage() {
           metaTitle: '',
           metaDescription: ''
         });
-      } else {
-        const error = await response.json();
-        toast.error(error.message || 'Failed to create product');
-      }
     } catch (err) {
       toast.error('An error occurred while creating the product');
     }
   };
-
-  //   if (loading || loadingCategories) return <div className="text-center py-10">Loading...</div>;
-  //   if (error || categoryError) return <div className="text-center py-10 text-red-500">Error: {error || categoryError}</div>;
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">

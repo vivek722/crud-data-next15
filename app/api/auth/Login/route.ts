@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
-        
+
         const PasswordValid = await compare(password, user.password);
         if (!PasswordValid) {
             return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             email: user.email,
             userName: user.userName,
         };
-        const JWTToken =  await generateJWT(payload)
+        const JWTToken = await generateJWT(payload)
         return NextResponse.json(
             {
                 message: 'Login successful',
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
                     id: user._id,
                     userName: user.userName,
                     email: user.email,
-                    Tokem:JWTToken
+                    Token: JWTToken
                 }
             },
             { status: 200 }
